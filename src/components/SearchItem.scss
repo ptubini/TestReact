@@ -1,0 +1,34 @@
+@import '../shared/variables';
+
+.search-item {
+    a {
+        text-decoration: none;
+    }
+
+    h2 {
+        color: $dark-blue;
+        font-size: 1.25rem;
+        line-height: 1.5rem;
+        font: 1.2rem 'Roboto',Sans-Serif;
+        margin: 0;
+    }
+
+    p {
+        margin: 0;
+        line-height: 1.375rem;
+        color: $grey;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        font: 1rem 'Roboto',Sans-Serif;
+    }
+
+    .display-url {
+        font: 1rem 'Roboto',Sans-Serif;
+        line-height: 1.375rem;
+        color: $green;
+        text-decoration: underline;
+    }
+}
