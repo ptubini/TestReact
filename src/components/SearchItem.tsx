@@ -1,4 +1,4 @@
-import './SearchItem.scss';
+import styles from './SearchItem.module.scss'; 
 
 export interface ISearchItem {
     id: string;
@@ -17,10 +17,10 @@ export default function SearchItem({ item }: ISearchItemProps): JSX.Element | nu
       return null;
     }
 
-    return <div className="search-item">
+    return <div className={styles["search-item"]}>
         <a href={item.url}>
             <h2>{item.name}</h2>
-            <p className="display-url">{item.displayUrl}</p>
+            <p className={styles["display-url"]}>{item.displayUrl}</p>
             <p>{item.snippet}</p>
         </a>
     </div>

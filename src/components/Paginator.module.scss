@@ -5,24 +5,26 @@
     margin: 0 auto;
     
     .paginator {
+        margin-top: 20px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 30px;
-        list-style: none;
         user-select: none;
 
-        li {
+        .page-number {
+            cursor: pointer;
+            background: none;
+            border: none;
             font-size: 16px;
             line-height: 20px;
-            cursor: pointer;
 
             &.current {
                 font-weight: 500;
             }
 
-            &.disabled {
+            &:disabled {
                 opacity: 0.3;
                 color: $grey;
                 cursor: not-allowed;
