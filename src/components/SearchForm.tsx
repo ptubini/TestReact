@@ -4,29 +4,39 @@ import styles from './SearchForm.module.scss';
 import Paginator from "./Paginator";
 import fetchBingSearch, { BingApiResponse } from "../services/BingApiService";
 
+interface SearchFormState {
+    searchTerm: string;
+    searchItems: ISearchItem[];
+    currentPage: number;
+    totalItems: number;
+    itemsPerPage: number;
+}
+
 export default function SearchForm(): JSX.Element | null {
 
-    const [searchTerm, setSearchTerm] = useState<string>("");
     const [showValidationError, setShowValidationError] = useState<boolean>(false);
     const [showApiError, setShowApiError] = useState<boolean>(false);
     const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalItems, setTotalItems] = useState<number>(0);
-    const [itemsPerPage] = useState<number>(10);
-    const [searchItems, setSearchItems] = useState<ISearchItem[]>([]);
+    const [formDetails, setFormDetails] = useState<SearchFormState>({
+        searchTerm: "",
+        searchItems: [],
+        currentPage: 1,
+        totalItems: 0,
+        itemsPerPage: 10
+    });
     
     useEffect(() => {
-        if (isFormSubmitted && searchTerm) {
-            setSearchItems([]);
+        if (isFormSubmitted && formDetails.searchTerm) {
+            setFormDetails((prevState) => ({...prevState, searchItems: []}));
             setIsLoading(true);
-            const offset = (currentPage - 1) * itemsPerPage + 1;
+            const offset = (formDetails.currentPage - 1) * formDetails.itemsPerPage;
 
-            fetchBingSearch(searchTerm, itemsPerPage, offset)
+            fetchBingSearch(formDetails.searchTerm, formDetails.itemsPerPage, offset)
             .then((response: BingApiResponse) => {
                 if (response && response.webPages) {
-                    setSearchItems(response.webPages.value);
-                    setTotalItems(response.webPages.totalEstimatedMatches);
+                    setFormDetails((prevState) => ({...prevState, searchItems: response.webPages.value}));
+                    setFormDetails((prevState) => ({...prevState, totalItems: response.webPages.totalEstimatedMatches}));
                     setIsLoading(false);
                 }
             })
@@ -38,20 +48,20 @@ export default function SearchForm(): JSX.Element | null {
             setShowApiError(false);
         };
 
-    }, [isFormSubmitted, currentPage, itemsPerPage, searchTerm]);
+    }, [isFormSubmitted, formDetails]);
 
     const previousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
+        if (formDetails.currentPage > 1) {
+            setFormDetails((prevState) => ({...prevState, currentPage: formDetails.currentPage - 1}));
             setIsFormSubmitted(true);
         }
     };
 
     const nextPage = () => {
-        const lastPage = Math.ceil(totalItems / itemsPerPage);
+        const lastPage = Math.ceil(formDetails.totalItems / formDetails.itemsPerPage);
         
-        if (currentPage !== lastPage) {
-            setCurrentPage(currentPage + 1);
+        if (formDetails.currentPage !== lastPage) {
+            setFormDetails((prevState) => ({...prevState, currentPage: formDetails.currentPage + 1}));
             setIsFormSubmitted(true);
         }
     };
@@ -59,7 +69,7 @@ export default function SearchForm(): JSX.Element | null {
     const handleSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
         
-        if (!searchTerm) {
+        if (!formDetails.currentPage) {
             setIsFormSubmitted(false);
             setShowValidationError(true);
             return;
@@ -76,22 +86,24 @@ export default function SearchForm(): JSX.Element | null {
                     name="search-term"
                     className={styles["search-term"]}
                     type="text"
-                    value={searchTerm}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value.replace(" ", "+"))}
+                    value={formDetails.searchTerm}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setFormDetails((prevState) => ({...prevState, searchTerm: e.target.value}));
+                    }}
                     placeholder="Search for..."
                 />
                 <input className={styles.submit} type="submit" value="Search" />
                 <label className={styles["validation-error"]}>{showValidationError ? "Please enter a search term" : ""}</label>
             </form>
             <div className={styles.results}>
-                {searchItems && searchItems.length ? (
+                {formDetails.searchItems && formDetails.searchItems.length ? (
                     <>
-                        <p>Results for: {searchTerm}</p>
-                        {searchItems.map((item) => <SearchItem key={item.id} item={item}></SearchItem>)}
+                        <p>Results for: {formDetails.searchTerm}</p>
+                        {formDetails.searchItems.map((item) => <SearchItem key={item.id} item={item}></SearchItem>)}
                         <Paginator
-                            totalItems={totalItems}
-                            currentPage={currentPage}
-                            perPage={itemsPerPage}
+                            totalItems={formDetails.totalItems}
+                            currentPage={formDetails.currentPage}
+                            perPage={formDetails.itemsPerPage}
                             previousPage={previousPage}
                             nextPage={nextPage}
                         />
